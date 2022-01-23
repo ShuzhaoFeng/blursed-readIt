@@ -8,7 +8,7 @@ from nltk.corpus import stopwords
 from flask import Flask, request
 from twilio.rest import Client
 from twilio.twiml.messaging_response import MessagingResponse
-from credentials import *
+from credentials import twilio_account_sid, twilio_auth_token, my_cell, twilio_phonenum, reddit_clientID, reddit_secret
 from difflib import get_close_matches
 
 app = Flask(__name__)  # create Flask app
