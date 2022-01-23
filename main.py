@@ -52,7 +52,7 @@ def getSubreddit(text):
                 searchWord, listSubreddit, n=1, cutoff=0.6)
         suggestion = suggestion[0][2:]
         subs = reddit.subreddit(suggestion).hot(limit=100)
-        return getBestPost(subs, text
+        return getBestPost(subs, text)
 
 def message(text):
      try:
