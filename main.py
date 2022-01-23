@@ -103,13 +103,13 @@ def getSubreddit(text):
     inputAdverb = sentenceParts["Adverb"]
     if len(inputNouns) != 0:
         noun = random.choice(inputNouns)
-        subs = reddit.subreddit(noun).hot(limit=100)
+        subs = reddit.subreddit(noun).hot(limit=100, over18=False)
     elif len(inputAdverb) != 0:
         adverb = random.choice(inputAdverb)
-        subs = reddit.subreddit(adverb).hot(limit=100)
+        subs = reddit.subreddit(adverb).hot(limit=100, over18=False)
     elif len(inputAdjective) != 0:
         adjective = random.choice(inputAdjective)
-        subs = reddit.subreddit(adjective).hot(limit=100)
+        subs = reddit.subreddit(adjective).hot(limit=100, over18=False)
     try:
         return getBestPost(subs, text)
 
@@ -130,7 +130,7 @@ def getSubreddit(text):
             suggestion = get_close_matches(
                 searchWord, listSubreddit, n=1, cutoff=0.6)
         suggestion = suggestion[0][2:]
-        subs = reddit.subreddit(suggestion).hot(limit=100)
+        subs = reddit.subreddit(suggestion).hot(limit=100, over18=False)
         return getBestPost(subs, text
 
 def message(text):
