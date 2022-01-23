@@ -1,15 +1,14 @@
-import praw
-import os
-from textblob import TextBlob
-import random
-import nltk
-from nltk.corpus import stopwords
-from difflib import SequenceMatcher, get_close_matches
-import json
+
 import prawcore
-nltk.download
-# secret = os.environ.get("secret")
-# clientID = os.environ.get("clientID")
+import json
+from difflib import SequenceMatcher, get_close_matches
+from nltk.corpus import stopwords
+import nltk
+import random
+from textblob import TextBlob
+import praw
+
+
 secret = "5g48PyXKQW7J5_j5i23emTDXvgRUcg"
 clientID = "CoNV4gzO0IjtG8lYqKuyRg"
 reddit = praw.Reddit(client_id=clientID,
@@ -19,9 +18,6 @@ text = input("> ")
 
 
 def getKeywords(text):
-    """
-
-    """
     stopWords = set(stopwords.words("english"))
     sentence = nltk.word_tokenize(text)
     filteredSentence = []
@@ -87,15 +83,13 @@ def getBestPost(subs):
     postsTitle = []
     postsUrl = []
     for submissions in subs:
-        title = submissions.title
-        url = submissions.url
         # if url.endswith("jpeg") or url.endswith("png") or url.endswith("jpg") or url.endswith("gif"):
         postsTitle.append(submissions.title)
         postsUrl.append(submissions.url)
     posts = dict(zip(postsTitle, postsUrl))
     articleTitle = analyzeTitles(postsTitle, text)
     link = posts[articleTitle]
-    return (articleTitle, link)
+    return [articleTitle, link]
 
 
 def getSubreddit(text):
@@ -104,24 +98,7 @@ def getSubreddit(text):
     inputNouns = sentenceParts["Noun"]
     inputAdjective = sentenceParts["Adjective"]
     inputAdverb = sentenceParts["Adverb"]
-    # if len(inputNouns) != 0:
-    #     wordType = "noun"
-    #     noun = random.choice(inputNouns)
-    #     subs = reddit.subreddit(noun).hot(limit=100)
-    # elif len(inputAdverb) != 0:
-    #     wordType = "adverb"
-    #     adverb = random.choice(inputAdverb)
-    #     subs = reddit.subreddit(adverb).hot(limit=100)
-    # elif len(inputAdjective) != 0:
-    #     wordType = "adjective"
-    #     adjective = random.choice(inputAdjective)
-    #     subs = reddit.subreddit(adjective).hot(limit=100)
-    # postsTitle = []
-    # postsUrl = []
-    # try:
-    #     return getBestPost(subs)
 
-    # except Exception:
     noun = ""
     adverb = ""
     adjective = ""
@@ -142,12 +119,6 @@ def getSubreddit(text):
     print(suggestion)
     subs = reddit.subreddit(suggestion).hot(limit=100)
     return getBestPost(subs)
-    # except Exception:
-    #     subs = reddit.subreddit("programminghumor").hot(limit=20)
-    #     for submissions in subs:
-    #         url = submissions.url
-    #         if url.endswith("jpeg") or url.endswith("png") or url.endswith("jpg"):
-    #             return url
 
 
 def message(text):
@@ -156,3 +127,4 @@ def message(text):
 
 
 print(message(text=text))
+print(message(text=text)[1])
