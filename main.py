@@ -60,7 +60,7 @@ def message(text):
         return redditPost[1]
 
     except:
-        return "Our wisest and brightest team member is currently digging through the code to resolve this issue. https://images-ext-2.discordapp.net/external/rHrzbafIax5hHS5hxo2FbPLItjDeaGgFx9oP8tChCgg/%3Fwidth%3D640%26crop%3Dsmart%26auto%3Dwebp%26s%3D0ba6e5b5ccbc7677fd5d133820bbbc900d863356/https/preview.redd.it/bu98ackay7d81.jpg?width=634&height=925"
+        return "Our wisest and brightest team member is currently digging through the code to resolve this issue. https://preview.redd.it/bu98ackay7d81.jpg?width=640&crop=smart&auto=webp&s=0ba6e5b5ccbc7677fd5d133820bbbc900d863356"
 
 
 @app.route('/sms', methods=['POST'])
