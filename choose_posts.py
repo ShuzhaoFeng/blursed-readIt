@@ -4,7 +4,10 @@ from textblob import TextBlob
 import random
 import nltk
 from nltk.corpus import stopwords
-
+from difflib import SequenceMatcher, get_close_matches
+import json
+import prawcore
+nltk.download
 # secret = os.environ.get("secret")
 # clientID = os.environ.get("clientID")
 secret = "5g48PyXKQW7J5_j5i23emTDXvgRUcg"
@@ -16,6 +19,9 @@ text = input("> ")
 
 
 def getKeywords(text):
+    """
+
+    """
     stopWords = set(stopwords.words("english"))
     sentence = nltk.word_tokenize(text)
     filteredSentence = []
@@ -77,42 +83,71 @@ def analyzeTitles(titles, text):
     return post
 
 
+def getBestPost(subs):
+    postsTitle = []
+    postsUrl = []
+    for submissions in subs:
+        title = submissions.title
+        url = submissions.url
+        # if url.endswith("jpeg") or url.endswith("png") or url.endswith("jpg") or url.endswith("gif"):
+        postsTitle.append(submissions.title)
+        postsUrl.append(submissions.url)
+    posts = dict(zip(postsTitle, postsUrl))
+    articleTitle = analyzeTitles(postsTitle, text)
+    link = posts[articleTitle]
+    return (articleTitle, link)
+
+
 def getSubreddit(text):
     keywords = getKeywords(text)
     sentenceParts = getKeywordsNouns(keywords)
     inputNouns = sentenceParts["Noun"]
     inputAdjective = sentenceParts["Adjective"]
     inputAdverb = sentenceParts["Adverb"]
-    print(sentenceParts)
+    # if len(inputNouns) != 0:
+    #     wordType = "noun"
+    #     noun = random.choice(inputNouns)
+    #     subs = reddit.subreddit(noun).hot(limit=100)
+    # elif len(inputAdverb) != 0:
+    #     wordType = "adverb"
+    #     adverb = random.choice(inputAdverb)
+    #     subs = reddit.subreddit(adverb).hot(limit=100)
+    # elif len(inputAdjective) != 0:
+    #     wordType = "adjective"
+    #     adjective = random.choice(inputAdjective)
+    #     subs = reddit.subreddit(adjective).hot(limit=100)
+    # postsTitle = []
+    # postsUrl = []
+    # try:
+    #     return getBestPost(subs)
+
+    # except Exception:
+    noun = ""
+    adverb = ""
+    adjective = ""
     if len(inputNouns) != 0:
         noun = random.choice(inputNouns)
-        subs = reddit.subreddit(noun).hot(limit=100)
-    elif len(inputAdverb) != 0:
+    if len(inputAdverb):
         adverb = random.choice(inputAdverb)
-        subs = reddit.subreddit(adverb).hot(limit=100)
-    elif len(inputAdjective) != 0:
+    if len(inputAdjective):
         adjective = random.choice(inputAdjective)
-        subs = reddit.subreddit(adjective).hot(limit=100)
-    postsTitle = []
-    postsUrl = []
-    try:
-        for submissions in subs:
-            title = submissions.title
-            url = submissions.url
-            if url.endswith("jpeg") or url.endswith("png") or url.endswith("jpg") or url.endswith("gif"):
-                postsTitle.append(submissions.title)
-                postsUrl.append(submissions.url)
-        posts = dict(zip(postsTitle, postsUrl))
-        articleTitle = analyzeTitles(postsTitle, text)
-        link = posts[articleTitle]
-        return (articleTitle, link)
-
-    except Exception:
-        subs = reddit.subreddit("programminghumor").hot(limit=20)
-        for submissions in subs:
-            url = submissions.url
-            if url.endswith("jpeg") or url.endswith("png") or url.endswith("jpg"):
-                return url
+    searchWord = "r/" + noun + adverb + adjective
+    print(searchWord)
+    with open("subreddits.json", "r") as data_file:
+        fp = json.load(data_file)
+        listSubreddit = list(fp)
+        suggestion = get_close_matches(
+            searchWord, listSubreddit, n=1, cutoff=0.6)
+    suggestion = suggestion[0][2:]
+    print(suggestion)
+    subs = reddit.subreddit(suggestion).hot(limit=100)
+    return getBestPost(subs)
+    # except Exception:
+    #     subs = reddit.subreddit("programminghumor").hot(limit=20)
+    #     for submissions in subs:
+    #         url = submissions.url
+    #         if url.endswith("jpeg") or url.endswith("png") or url.endswith("jpg"):
+    #             return url
 
 
 def message(text):
