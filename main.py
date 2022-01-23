@@ -1,7 +1,6 @@
 import random
 import json
 import praw
-import prawcore
 from textblob import TextBlob
 import nltk
 from nltk.corpus import stopwords
@@ -143,7 +142,7 @@ def get_subreddit(text):
     try:
         return get_best_post(subs, text)
     # Attempts to autocorrect the user input to match with a subreddit in subreddit.json
-    except prawcore.exceptions.NotFound:
+    except Exception:
         noun = ""
         adverb = ""
         adjective = ""
@@ -196,3 +195,4 @@ if __name__ == '__main__':
     reddit = praw.Reddit(client_id=reddit_clientID, client_secret=reddit_secret,
                          user_agent="hackathon")  # your Reddit id
     app.run()
+
