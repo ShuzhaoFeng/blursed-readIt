@@ -14,6 +14,9 @@ def getBestPost(subs, text):
 
 
 def getSubreddit(text):
+    """
+    Searches in the most relevant subreddit from the user's 
+    """
     keywords = getKeywords(text)
     sentenceParts = getKeywordsNouns(keywords)
     inputNouns = sentenceParts["Noun"]
@@ -31,7 +34,7 @@ def getSubreddit(text):
     try:
         return getBestPost(subs, text)
 
-    except Exception:
+    except prawcore.exceptions.NotFound:
         noun = ""
         adverb = ""
         adjective = ""
@@ -49,12 +52,15 @@ def getSubreddit(text):
                 searchWord, listSubreddit, n=1, cutoff=0.6)
         suggestion = suggestion[0][2:]
         subs = reddit.subreddit(suggestion).hot(limit=100)
-        return getBestPost(subs, text)
-
+        return getBestPost(subs, text
 
 def message(text):
-    redditPost = getSubreddit(text=text)
-    return redditPost[1]
+     try:
+        redditPost = getSubreddit(text=text)
+        return redditPost[1]
+
+    except:
+        return "Our wisest and brightest team member is currently digging through the code to resolve this issue. https://images-ext-2.discordapp.net/external/rHrzbafIax5hHS5hxo2FbPLItjDeaGgFx9oP8tChCgg/%3Fwidth%3D640%26crop%3Dsmart%26auto%3Dwebp%26s%3D0ba6e5b5ccbc7677fd5d133820bbbc900d863356/https/preview.redd.it/bu98ackay7d81.jpg?width=634&height=925"
 
 
 @app.route('/sms', methods=['POST'])
