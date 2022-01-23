@@ -16,7 +16,7 @@ clientID = "CoNV4gzO0IjtG8lYqKuyRg"
 reddit = praw.Reddit(client_id=clientID,
                      client_secret=secret, user_agent="hackathon")
 
-text = input("> ")
+text = input(">")
 
 
 def getKeywords(text):
@@ -83,7 +83,7 @@ def analyzeTitles(titles, text):
     return post
 
 
-def getBestPost(subs):
+def getBestPost(subs, text):
     postsTitle = []
     postsUrl = []
     for submissions in subs:
@@ -114,7 +114,7 @@ def getSubreddit(text):
         adjective = random.choice(inputAdjective)
         subs = reddit.subreddit(adjective).hot(limit=100)
     try:
-        return getBestPost(subs)
+        return getBestPost(subs, text)
 
     except Exception:
         noun = ""
@@ -134,13 +134,10 @@ def getSubreddit(text):
                 searchWord, listSubreddit, n=1, cutoff=0.6)
         suggestion = suggestion[0][2:]
         subs = reddit.subreddit(suggestion).hot(limit=100)
-        return getBestPost(subs)
+        return getBestPost(subs, text)
 
 
 def message(text):
     redditPost = getSubreddit(text=text)
     stringRedditPost = f"Title: {redditPost[0]}\nURL: {redditPost[1]}"
     return stringRedditPost
-
-
-print(message(text=text))
