@@ -1,3 +1,82 @@
+import random
+import json
+import praw
+from textblob import TextBlob
+import nltk
+from nltk.corpus import stopwords
+from flask import Flask, request, jsonify
+from twilio.rest import Client
+from twilio.twiml.messaging_response import MessagingResponse
+from credentials import *
+from difflib import get_close_matches
+
+app = Flask(__name__)  # create Flask app
+
+
+def getKeywords(text):
+    """
+    """
+    stopWords = set(stopwords.words("english"))
+    sentence = nltk.word_tokenize(text)
+    filteredSentence = []
+    for words in sentence:
+        if words not in stopWords:
+            filteredSentence.append(words)
+
+    return filteredSentence
+
+
+def getKeywordsNouns(filtered):
+    partSpeech = nltk.pos_tag(filtered)
+    partsSpeechDict = {
+        "Adjective": [],
+        "Adverb": [],
+        "Noun": [],
+        "Interrogation": []
+    }
+    print(partSpeech)
+    for parts in partSpeech:
+        partOfSpeech = parts[1]
+        if partOfSpeech.startswith("N"):
+            partsSpeechDict["Noun"].append(parts[0])
+        elif partOfSpeech.startswith("J"):
+            partsSpeechDict["Adjective"].append(parts[0])
+        elif partOfSpeech.startswith("R") or partOfSpeech.startswith("V"):
+            partsSpeechDict["Adverb"].append(parts[0])
+        elif partOfSpeech.startswith("W"):
+            partsSpeechDict["Interrogation"].append(parts[0])
+
+    return partsSpeechDict
+
+
+def sentiment_analysis(text):
+    testimonial = TextBlob(text)
+    return testimonial
+
+
+def analyzeTitles(titles, text):
+    sentimentInput = sentiment_analysis(text=text)
+    userSentiment = sentimentInput.sentiment.polarity
+    titleScore = dict.fromkeys(titles, 0)
+    for title in titleScore.keys():
+        processing_input = sentiment_analysis(text=title)
+        sentiment_text = processing_input.sentiment.polarity
+        titleScore[title] = sentiment_text
+
+    sortedTitleScore = {k: v for k, v in sorted(
+        titleScore.items(), key=lambda item: item[1])}
+    if userSentiment < 0:
+        sadTitle = list(sortedTitleScore.keys())[0]
+        post = sadTitle
+
+    else:
+        happyTitle = list(sortedTitleScore.keys())[-1]
+        happyUrl = sortedTitleScore[happyTitle]
+        post = happyTitle
+
+    return post
+
+
 def getBestPost(subs, text):
     postsTitle = []
     postsUrl = []
@@ -52,7 +131,7 @@ def getSubreddit(text):
                 searchWord, listSubreddit, n=1, cutoff=0.6)
         suggestion = suggestion[0][2:]
         subs = reddit.subreddit(suggestion).hot(limit=100)
-        return getBestPost(subs, text)
+        return getBestPost(subs, text
 
 def message(text):
      try:
