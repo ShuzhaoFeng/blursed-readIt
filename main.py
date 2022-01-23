@@ -19,43 +19,45 @@ def sms():  # default function for twilio
     text = request.form.get('Body')  # get your input message
     resp = MessagingResponse()  # enable response
     my_msg = "*placeholder message*"  # a message on top of the image
-    my_url = [str(message(text=text)[1])]
+    my_url = [message(text=text)[1]]
     return client.messages.create(to=my_cell, from_=twilio_phonenum,
                                   body=my_msg, media_url=my_url)  # send this back to user
 
 
-def get_keywords(text):
-    stop_words = set(stopwords.words("english"))
+def getKeywords(text):
+    """
+    """
+    stopWords = set(stopwords.words("english"))
     sentence = nltk.word_tokenize(text)
-    filtered_sentence = []
+    filteredSentence = []
     for words in sentence:
-        if words not in stop_words:
-            filtered_sentence.append(words)
+        if words not in stopWords:
+            filteredSentence.append(words)
 
-    return filtered_sentence
+    return filteredSentence
 
 
-def get_keywords_nouns(filtered):
-    part_speech = nltk.pos_tag(filtered)
-    parts_speech_dict = {
+def getKeywordsNouns(filtered):
+    partSpeech = nltk.pos_tag(filtered)
+    partsSpeechDict = {
         "Adjective": [],
         "Adverb": [],
         "Noun": [],
         "Interrogation": []
     }
-    print(part_speech)
-    for parts in part_speech:
-        part_of_speech = parts[1]
-        if part_of_speech.startswith("N"):
-            parts_speech_dict["Noun"].append(parts[0])
-        elif part_of_speech.startswith("J"):
-            parts_speech_dict["Adjective"].append(parts[0])
-        elif part_of_speech.startswith("R") or part_of_speech.startswith("V"):
-            parts_speech_dict["Adverb"].append(parts[0])
-        elif part_of_speech.startswith("W"):
-            parts_speech_dict["Interrogation"].append(parts[0])
+    print(partSpeech)
+    for parts in partSpeech:
+        partOfSpeech = parts[1]
+        if partOfSpeech.startswith("N"):
+            partsSpeechDict["Noun"].append(parts[0])
+        elif partOfSpeech.startswith("J"):
+            partsSpeechDict["Adjective"].append(parts[0])
+        elif partOfSpeech.startswith("R") or partOfSpeech.startswith("V"):
+            partsSpeechDict["Adverb"].append(parts[0])
+        elif partOfSpeech.startswith("W"):
+            partsSpeechDict["Interrogation"].append(parts[0])
 
-    return parts_speech_dict
+    return partsSpeechDict
 
 
 def sentiment_analysis(text):
@@ -63,75 +65,87 @@ def sentiment_analysis(text):
     return testimonial
 
 
-def analyze_titles(titles, text):
-    sentiment_input = sentiment_analysis(text=text)
-    user_sentiment = sentiment_input.sentiment.polarity
-    title_score = dict.fromkeys(titles, 0)
-    for title in title_score.keys():
+def analyzeTitles(titles, text):
+    sentimentInput = sentiment_analysis(text=text)
+    userSentiment = sentimentInput.sentiment.polarity
+    titleScore = dict.fromkeys(titles, 0)
+    for title in titleScore.keys():
         processing_input = sentiment_analysis(text=title)
         sentiment_text = processing_input.sentiment.polarity
-        title_score[title] = sentiment_text
+        titleScore[title] = sentiment_text
 
-    sorted_title_score = {k: v for k, v in sorted(
-        title_score.items(), key=lambda item: item[1])}
-    if user_sentiment < 0:
-        sad_title = list(sorted_title_score.keys())[0]
-        post = sad_title
+    sortedTitleScore = {k: v for k, v in sorted(
+        titleScore.items(), key=lambda item: item[1])}
+    if userSentiment < 0:
+        sadTitle = list(sortedTitleScore.keys())[0]
+        post = sadTitle
 
     else:
-        happy_title = list(sorted_title_score.keys())[-1]
-        happy_url = sorted_title_score[happy_title]
-        post = happy_title
+        happyTitle = list(sortedTitleScore.keys())[-1]
+        happyUrl = sortedTitleScore[happyTitle]
+        post = happyTitle
 
     return post
 
 
-def get_best_post(subs):
-    global text
-    posts_title = []
-    posts_url = []
+def getBestPost(subs, text):
+    postsTitle = []
+    postsUrl = []
     for submissions in subs:
+        title = submissions.title
+        url = submissions.url
         # if url.endswith("jpeg") or url.endswith("png") or url.endswith("jpg") or url.endswith("gif"):
-        posts_title.append(submissions.title)
-        posts_url.append(submissions.url)
-    posts = dict(zip(posts_title, posts_url))
-    article_title = analyze_titles(posts_title, text)
-    link = posts[article_title]
-    return [article_title, link]
+        postsTitle.append(submissions.title)
+        postsUrl.append(submissions.url)
+    posts = dict(zip(postsTitle, postsUrl))
+    articleTitle = analyzeTitles(postsTitle, text)
+    link = posts[articleTitle]
+    return (articleTitle, link)
 
 
-def get_subreddit(text):
-    keywords = get_keywords(text)
-    sentence_parts = get_keywords_nouns(keywords)
-    input_nouns = sentence_parts["Noun"]
-    input_adverb = sentence_parts["Adverb"]
-    input_adjective = sentence_parts["Adjective"]
+def getSubreddit(text):
+    keywords = getKeywords(text)
+    sentenceParts = getKeywordsNouns(keywords)
+    inputNouns = sentenceParts["Noun"]
+    inputAdjective = sentenceParts["Adjective"]
+    inputAdverb = sentenceParts["Adverb"]
+    if len(inputNouns) != 0:
+        noun = random.choice(inputNouns)
+        subs = reddit.subreddit(noun).hot(limit=100)
+    elif len(inputAdverb) != 0:
+        adverb = random.choice(inputAdverb)
+        subs = reddit.subreddit(adverb).hot(limit=100)
+    elif len(inputAdjective) != 0:
+        adjective = random.choice(inputAdjective)
+        subs = reddit.subreddit(adjective).hot(limit=100)
+    try:
+        return getBestPost(subs, text)
 
-    noun = ""
-    adverb = ""
-    adjective = ""
-    if len(input_nouns) != 0:
-        noun = random.choice(input_nouns)
-    if len(input_adverb):
-        adverb = random.choice(input_adverb)
-    if len(input_adjective):
-        adjective = random.choice(input_adjective)
-    search_word = "r/" + noun + adverb + adjective
-    print(search_word)
-    with open("subreddits.json", "r") as data_file:
-        fp = json.load(data_file)
-        list_subreddit = list(fp)
-        suggestion = get_close_matches(
-            search_word, list_subreddit, n=1, cutoff=0.6)
-    suggestion = suggestion[0][2:]
-    print(suggestion)
-    subs = reddit.subreddit(suggestion).hot(limit=100)
-    return get_best_post(subs)
+    except Exception:
+        noun = ""
+        adverb = ""
+        adjective = ""
+        if len(inputNouns) != 0:
+            noun = random.choice(inputNouns)
+        if len(inputAdverb):
+            adverb = random.choice(inputAdverb)
+        if len(inputAdjective):
+            adjective = random.choice(inputAdjective)
+        searchWord = "r/" + noun + adverb + adjective
+        with open("subreddits.json", "r") as data_file:
+            fp = json.load(data_file)
+            listSubreddit = list(fp)
+            suggestion = get_close_matches(
+                searchWord, listSubreddit, n=1, cutoff=0.6)
+        suggestion = suggestion[0][2:]
+        subs = reddit.subreddit(suggestion).hot(limit=100)
+        return getBestPost(subs, text)
 
 
 def message(text):
-    reddit_post = get_subreddit(text=text)
-    return reddit_post
+    redditPost = getSubreddit(text=text)
+    stringRedditPost = f"Title: {redditPost[0]}\nURL: {redditPost[1]}"
+    return stringRedditPost
 
 
 if __name__ == '__main__':
@@ -140,4 +154,3 @@ if __name__ == '__main__':
     reddit = praw.Reddit(client_id=reddit_clientID, client_secret=reddit_secret,
                          user_agent="hackathon")  # your Reddit id
     app.run()
-
