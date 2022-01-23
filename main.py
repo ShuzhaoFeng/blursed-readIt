@@ -15,6 +15,7 @@ app = Flask(__name__)  # create Flask app
 
 @app.route('/sms', methods=['POST'])
 def sms():  # default function for twilio
+    global text
     text = request.form.get('Body')  # get your input message
     resp = MessagingResponse()  # enable response
     my_msg = "*placeholder message*"  # a message on top of the image
@@ -86,6 +87,7 @@ def analyze_titles(titles, text):
 
 
 def get_best_post(subs):
+    global text
     posts_title = []
     posts_url = []
     for submissions in subs:
@@ -133,7 +135,9 @@ def message(text):
 
 
 if __name__ == '__main__':
+    text = ""
     client = Client(twilio_account_sid, twilio_auth_token)  # your Twilio id and auth token
     reddit = praw.Reddit(client_id=reddit_clientID, client_secret=reddit_secret,
                          user_agent="hackathon")  # your Reddit id
     app.run()
+
