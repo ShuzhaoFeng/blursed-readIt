@@ -105,19 +105,14 @@ def getSubreddit(text):
     inputAdjective = sentenceParts["Adjective"]
     inputAdverb = sentenceParts["Adverb"]
     if len(inputNouns) != 0:
-        wordType = "noun"
         noun = random.choice(inputNouns)
         subs = reddit.subreddit(noun).hot(limit=100)
     elif len(inputAdverb) != 0:
-        wordType = "adverb"
         adverb = random.choice(inputAdverb)
         subs = reddit.subreddit(adverb).hot(limit=100)
     elif len(inputAdjective) != 0:
-        wordType = "adjective"
         adjective = random.choice(inputAdjective)
         subs = reddit.subreddit(adjective).hot(limit=100)
-    postsTitle = []
-    postsUrl = []
     try:
         return getBestPost(subs)
 
@@ -132,21 +127,20 @@ def getSubreddit(text):
         if len(inputAdjective):
             adjective = random.choice(inputAdjective)
         searchWord = "r/" + noun + adverb + adjective
-        print(searchWord)
         with open("subreddits.json", "r") as data_file:
             fp = json.load(data_file)
             listSubreddit = list(fp)
             suggestion = get_close_matches(
                 searchWord, listSubreddit, n=1, cutoff=0.6)
         suggestion = suggestion[0][2:]
-        print(suggestion)
         subs = reddit.subreddit(suggestion).hot(limit=100)
         return getBestPost(subs)
 
 
 def message(text):
     redditPost = getSubreddit(text=text)
-    return redditPost
+    stringRedditPost = f"Title: {redditPost[0]}\nURL: {redditPost[1]}"
+    return stringRedditPost
 
 
 print(message(text=text))
